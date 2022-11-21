@@ -14,5 +14,11 @@ input_dct = {
 'vacancy',
 'repairs', 'cap_x', 'prop_management'],
 'yes':['yes','y','ye','yeah','yup','sure','mhm'],
-'no': ['no','nope','naw','nuh uh', 'na', 'negatory', 'negative']
+'no': ['no','nope','naw','nuh uh', 'na', 'negatory', 'negative', 'n']
+}
+
+txt = {
+    'monthly_plural' :"Your monthly expenses at this level are: {expenses}",
+    "monthly_other" : 'Monthly insurance cost: {insurance}',
+    "wait_part": '(W)ait: put your portfolio together, then adjust the numbers.',
 }
