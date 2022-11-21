@@ -29,7 +29,7 @@ class Owner():
 
     @property
     def yearly_income(self):
-        return self._income * 12
+        return self._monthly_income * 12
         
     @property
     def yearly_expenses(self):
@@ -53,35 +53,32 @@ class Owner():
 
     @monthly_income.setter
     def monthly_income(self, new=0):
-        if new < 0:
-            raise ValueError(f"You cannot have negative monthly expenses.")
-        if self.rent:
-            self._monthly_income = self.rent + self.laundry + self.storage + self.misc
-        elif self.portfolio:
+        if self.portfolio:
             new = [part.income for part in self.portfolio]
             self._monthly_income = sum(new)
         else:
-            self._monthly_income = new
+            if new < 0:
+                raise ValueError(f"You cannot have negative monthly expenses.")
+            else:
+                self._monthly_income = new
 
     @monthly_expenses.setter
     def monthly_expenses(self, new=0):
-        if new < 0:
-            raise ValueError(f"You cannot have negative monthly expenses.")
-        if self._insurance:
-            self._monthly_expenses =self.insurance + self.utilities + self.lawncare + self.mortgage + self.vacancy + self.repairs + self.cap_x + self.property_management
-        elif self.portfolio:
+        if self.portfolio:
             print("portmontaeu")
             new = [part.expenses for part in self.portfolio]
             self._monthly_expenses = sum(new)
-        
         else:
-            self._monthly_expenses = new
+            if new < 0:
+                raise ValueError(f"You cannot have negative monthly expenses.")
+            else:
+                self._monthly_expenses = new
         # this is unnecessary
     # @monthly_cashflow.setter
     # def monthly_cashflow(self):
     #     self._monthly_cashflow = 
     
-    @roi.setter
+    # @roi.setter
     def set_roi(self):
         # currently this is broken but functionality returns when changed to a 
         # property rather than a setter wit this function:
@@ -115,7 +112,10 @@ And based on your investment your ROI is {building.yearly_cashflow / investment}
 class Building(Owner):
     def __init__(self, name, investment):
         super().__init__(name)
-
+        self.monthly_income = 0
+        self.monthly_expenses = 0
+        self.monthly_cashflow
+        self.set_roi()
          
 
 # property price, number of units, monthly insurance,
@@ -143,6 +143,10 @@ class Unit(Building):
         self._repairs = repairs
         self._cap_x = cap_x
         self._property_management = property_management
+        self.monthly_income = 0
+        self.monthly_expenses = 0
+        self.monthly_cashflow
+        self.set_roi()
 
     # def check_source(self, source):
     #     """Income checks"""
@@ -227,6 +231,8 @@ class Unit(Building):
 
     # attribute setters and incrementers
     #       income
+
+
     @rent.setter
     def rent(self, new_rent=0):
         self._rent = new_rent
@@ -280,6 +286,25 @@ class Unit(Building):
     def property_management(self, new_prop_management=0):
         self._prop_management = new_prop_management
 
+    monthly_income.setter
+    def monthly_income(self, new=0):
+        if self.rent:
+            self._monthly_income = self.rent + self.laundry + self.storage + self.misc
+        else:
+            if new < 0:
+                raise ValueError(f"You cannot have negative monthly expenses.")
+            else:
+                self._monthly_income = new
+
+    @monthly_expenses.setter
+    def monthly_expenses(self, new=0):
+        if self._insurance:
+            self._monthly_expenses =self.insurance + self.utilities + self.lawncare + self.mortgage + self.vacancy + self.repairs + self.cap_x + self.property_management
+        else:
+            if new < 0:
+                raise ValueError(f"You cannot have negative monthly expenses.")
+            else:
+                self._monthly_expenses = new
 
     def st_lump_income(self, rent, laundry_income, storage_income, misc_income,):
         pass
