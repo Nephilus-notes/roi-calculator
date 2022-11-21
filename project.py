@@ -2,7 +2,7 @@ from cache import owner_dct as o_d, input_dct as i_d
 
 class Owner():
     def __init__(self, name, investment=50000):
-        self.portfolio = {}
+        self.portfolio = []
         self.name = name
         self._investment = investment
         self._income = 1
@@ -113,7 +113,7 @@ Cashflow: {building.monthly_cashflow}
 And based on your investment your ROI is {building.yearly_cashflow / investment}''')
 
 class Building(Owner):
-    def __init__(self, name):
+    def __init__(self, name, investment):
         super().__init__(name)
 
          
@@ -126,23 +126,23 @@ class Building(Owner):
 
 
 class Unit(Building):
-    def __init__(self, name, rent =0,mortgage = 0, laundry_income=0, storage_income=0, misc_income=0, insurance=1, utilities=1, lawn_care_expense=1):
+    def __init__(self, name, rent =0,mortgage = 0, laundry=0, storage=0, misc=0, insurance=1, utilities=1, lawncare=1,property_management=1, cap_x=1,repairs=1,vacancy=1):
         self.name = name
-        super().__init__(name)
+        super().__init__(name, investment=0)
         # income sources
         self._rent = rent
-        self._laundry_income = laundry_income
-        self._storage_income = storage_income
-        self._misc_income = misc_income
+        self._laundry_income = laundry
+        self._storage_income = storage
+        self._misc_income = misc
         # expense sources
         self._insurance = insurance
         self._utilities = utilities
-        self._lawn_care_expense = lawn_care_expense
+        self._lawn_care_expense = lawncare
         self._mortgage = mortgage
-        self._vacancy = self.rent *.05
-        self._repairs = self.rent *.05
-        self._cap_x = self.rent *.05
-        self._property_management = self.rent *.1
+        self._vacancy = vacancy
+        self._repairs = repairs
+        self._cap_x = cap_x
+        self._property_management = property_management
 
     # def check_source(self, source):
     #     """Income checks"""

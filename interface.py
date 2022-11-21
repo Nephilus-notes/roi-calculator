@@ -1,4 +1,4 @@
-from cache import owner_dct as o_d, input_dct as i_d
+from cache import owner_dct as o_d, input_dct as i_d, expense_dict as e_d
 from project import Owner, Building, Unit
 txt = {
 'wrong_num': "Something went wrong. We're looking for a number: "
@@ -17,12 +17,18 @@ class Driver():
         return o_d[name]
         
 
-    def create_property(self, owner):
-        name = input("""What would you like to call this property? 
+    def create_building_dict(self):
+        name = input("""What would you like to call this building? 
 Individual names are encouraged to avoid confusion. """)
-        name = Building(name,)
-        owner.portfolio[name] = name
-        unit_num = input(f"Got it. How many units does {name.name.title()} have? ")
+        investment = input("And how much did you invest in this building? ")
+        while True:
+            try: 
+                investment = int(investment)
+                break
+            except:
+                investment = input(txt["wrong_num"])
+        
+        unit_num = input(f"Got it. How many units does {name.title()} have? ")
         while True:
             try: 
                 unit_num = int(unit_num)
@@ -30,16 +36,31 @@ Individual names are encouraged to avoid confusion. """)
                 break
             except:
                 unit_num = input(txt["wrong_num"])
+        unit_list = []
+            
         for unit in range(unit_num):
             print(f"Unit {unit + 1}")
             unit_name = input("""What would you like to call this unit? """)
-            self.create_unit(name, unit_name)
-        return owner.portfolio[name]
+            unit_name = {'name':unit_name, }
+            unit_list.append(unit_name)
+        name = {'name':name, 'investment':investment, 'unit_list': unit_list}
+        return name
 
+    def create_building(self, user, building):
+        unit_list = []
+        for unit in building['unit_list']:
+            print( building['name'], unit['name'], unit)
+            unit_list.append(self.create_unit(building['name'], unit['name'], unit))
+        building = Building(building['name'], building['investment'])
+        user.portfolio.append(building)
+        for unit in unit_list:
+            building.portfolio.append(unit)
+        
+        
 
-    def create_unit(self, property, name, *args):
-        name = Unit(name, *args)
-        property.portfolio[name] = name
+    def create_unit(self, building, name, **kwargs):
+        name = Unit(name, **kwargs)
+        building.portfolio[name] = name
 
     def main(self):
         name = input("""Welcome to our software. Please input your name: """).lower().strip()
@@ -51,12 +72,12 @@ Individual names are encouraged to avoid confusion. """)
             else:
                 new_user =input(f"Hi {name.title()} looks like you're a new user, right? ")
                 if new_user in i_d['yes']:
-                    self.new_user(name)
+                    self.new_user_build_portfolio(name)
                     break
 
             name = input("Looks like something went wrong.  Input your name again here: ")
 
-    def new_user(self, user):
+    def new_user_build_portfolio(self, user):
         print("Fantastic! Ready for us to help you take over the world?")
         investment = input("First off we'd like to ask how much you've already invested: ")
         while True:
@@ -66,7 +87,7 @@ Individual names are encouraged to avoid confusion. """)
             except:
                 investment = input(txt["wrong_num"])
         user = self.create_owner(user, investment)
-        prop_num = input("Now how many properties have you invested in? ")
+        prop_num = input("Now how many building have you invested in? ")
         while True:
             try: 
                 prop_num = int(prop_num)
@@ -74,90 +95,84 @@ Individual names are encouraged to avoid confusion. """)
             except:
                 prop_num = input(txt["wrong_num"])
         count = 0
-        for properties in range(prop_num):
+        building_list = []
+        for buildings in range(prop_num):
             count += 1
-            prop_object = self.create_property(user)
+            building_list.append(self.create_building_dict())
             if prop_num > count:
-                finish = input("""We have put together your property. Would you 
-    like to [Input] specifics or [Continue] putting together properties? """).lower().strip()
+                finish = input("""We have put together your building. Would you 
+    like to [Input] specifics or [Continue] putting together your building portfolio? """).lower().strip()
                 while True:
                     if finish in  ['i','in', 'input']:
-                        self.rent_prompt(prop_object)
-                        slm_income_dict = self.get_property_slm_income() 
-                        self.set_property_income(slm_income_dict, prop_object)
-                        self.expenses_main(prop_object)
-                        for unit in prop_object.portfolio:
+                        building = building_list[-1]
+                        self.rent_prompt(building['name'], building['unit_list'])
+                        slm_income_dict = self.get_building_slm_income() 
+                        unit_slm = {k: v/len(building['unit_list'])-1 for k,v in slm_income_dict.items()}
+                        for unit in building['unit_list']:
+                            unit.update(unit_slm.copy())
+                        self.expenses_main(building)
+                        # for unit in building['unit_list']:
+                            # print(unit)
+                        self.create_building(user, building)
+                        for unit in building['unit_list']:
                             print("\n")
                             unit.show_all_monthly()
-                        print(prop_object)
+                        print(building)
                         break
                     elif finish in ['c', 'continue', 'con']:
                         break
                     else:
                         finish =input("What was that again? [Input] or [Continue]:")
-        investment = investment / len(user.portfolio)
-        for prop in user.portfolio:
-            print(prop_object)
-            self.rent_prompt(prop_object)
-            slm_income_dict = self.get_property_slm_income() 
-            self.set_property_income(slm_income_dict, prop_object)
-            self.expenses_main(prop_object)
-            print(prop_object)
-            print('_'*15)
-            for unit in prop_object.portfolio:
-                print(f'\n{unit.name}')
+        # investment = investment / len(user.portfolio)
+        for building in building_list:
+            print(building['name'].title())
+            self.rent_prompt(building['name'], building['unit_list'])
+            slm_income_dict = self.get_building_slm_income() 
+            unit_slm = {k: v/len(building['unit_list'])-1 for k,v in slm_income_dict.items()}
+            for unit in building['unit_list']:
+                unit.update(unit_slm.copy())
+                # print(unit)
+            self.expenses_main(building)
+            self.create_building(user, building)
+            for unit in building['unit_list']:
+                print("\n")
                 unit.show_all_monthly()
+            print(building)
             # prop.show_all(prop_object, investment)
            
 
 
-# self.expenses_early(name_unit_tuple)
-
-
-        #         while True:
-        #             if finish in  ['i', 'input']:
-        #                 self.expenses_early(name_unit_tuple)
-        #                 break
-        #             elif finish in ['c', 'continue', 'con']:
-        #                 break
-        #             else:
-        #                 print("What was that again? [Input] or [Continue]:")
-        # self.expenses_early(name_unit_tuple)
-
-
-
-    def rent_prompt(self, prop_object):
-        rent_method = input("Would you like to set unit rent (I)ndividually or for the (P)roperty? ").lower().strip()
+    def rent_prompt(self, building_name, unit_list):
+        rent_method = input("Would you like to set unit rent (I)ndividually or for the (B)uilding? ").lower().strip()
         while True:
             if rent_method in ['i', 'indiv', 'in', 'individually']:
-                for unit in prop_object.portfolio:
-                    print(unit)
-                    rent = self.blanket_rent_set()
-                    unit.rent = rent
-                    print(unit, unit.rent)
+                for unit in unit_list:
+                    print(unit['name'].title())
+                    unit['rent'] = self.blanket_rent_get(unit['name'])
+                    
                 break
                 # need to add function here
-            elif rent_method in ['p', 'prop', 'property']:
-                self.set_property_rent(prop_object)
+            elif rent_method in ['b', 'build', 'building']:
+                self.set_building_rent(building_name, unit_list)
                 break
             else:
                 rent_method = ("Come again? Set rent (I)ndividually or for the (P)roperty")
                 
 
-    def set_property_rent(self, prop_object):
-        rent = self.blanket_rent_set()
-        for unit in prop_object.portfolio:
-            unit.rent = rent
+    def set_building_rent(self, building_name, unit_list):
+        rent = self.blanket_rent_get(building_name)
+        for unit in unit_list:
+            unit['rent'] = rent
 
 
-    def get_property_slm_income(self):
-        income_method = input("""And do you have other income streams to set for the property? 
+    def get_building_slm_income(self):
+        income_method = input("""And do you have other income streams to set for the building? 
 (S)torage
 (L)aundry
 (M)isc
 (A)ll of the above
 """).lower().strip()
-        slm_income = {'storage': 0, 'laundry': 0, 'misc': 0}
+        slm_income = {'storage': 0, 'laundry': 1, 'misc': 1}
         while True:
             if income_method in ['s', 'stor', 'store', 'storage']:
                 try:
@@ -186,11 +201,11 @@ Individual names are encouraged to avoid confusion. """)
                 income_method = input("what was that?")
             
 
-    def blanket_rent_set(self):
+    def blanket_rent_get(self, name):
         rent_running = True
         while rent_running:
             try: 
-                rent = int(input('What would you like to set the rent at? '))
+                rent = int(input(f'How much is the rent for {name.title()}? '))
                 return rent
                 rent_running = False
                 break
@@ -198,33 +213,34 @@ Individual names are encouraged to avoid confusion. """)
                 rent = input("What number would you like to set the rent to? ")
                 # return rent
 
-    def set_property_income(self, slm_income_dict, prop_object):
-        for unit in prop_object.portfolio:
-            unit.storage = slm_income_dict['storage']
-            unit.laundry = slm_income_dict['laundry']
-            unit.misc = slm_income_dict['misc']
+    # def set_building_income(self, slm_income_dict, prop_object):
+    #     for unit in prop_object.portfolio:
+    #         unit.storage = slm_income_dict['storage']
+    #         unit.laundry = slm_income_dict['laundry']
+    #         unit.misc = slm_income_dict['misc']
 
-    def expenses_main(self, prop_object):                   
+    def expenses_main(self, building):                   
         expense_method = input("""What format would you like to give us expenses in? 
-    (L)ump: expenses for the property
+    (L)ump: expenses for the building
     (p)ercentage: We'll base your expenses off a percentage of the rent.
     (S)et: choose specific numbers for individual units.""").lower().strip()
         while True:
             if expense_method in ['l', 'lump']:
-                property_expenses = self.expenses_get()
+                building_expenses = self.expenses_get()
                 # unit_expenses = list(map(lambda kv: (kv[0]: kv[1] / len(prop_object.portfolio)), property_expenses))
-                unit_expenses = {k: v/len(prop_object.portfolio) for k,v in property_expenses.items()}
-                for unit in prop_object.portfolio:
-                    self.expense_assign(unit, unit_expenses)
-                    
+                unit_expenses = {k: v/len(building['unit_list'])-1 for k,v in building_expenses.items()}
+                for unit in building['unit_list']:
+                    unit.update(unit_expenses.copy())
+                    print(unit)
                 break
             elif expense_method in ['p', 'percentage']:
                 perc = self.percentage_get()
-                for unit in prop_object.portfolio:
-                    unit.st_percent_all_expense(perc)
+                for unit in building['unit_list']:
+                    for expense in e_d.keys():
+                        unit[expense] = unit['rent'] * perc
                 break
             elif expense_method in ['s', 'set']:
-                self.unit_expenses(prop_object)
+                self.unit_expenses(building)
                 break
             # elif expense_method in ['w', 'wait']:
             #     pass
@@ -255,48 +271,31 @@ Individual names are encouraged to avoid confusion. """)
                 monthly_repairs = int(input("How much is your monthly repairs budget? " ))
                 monthly_cap_x = int(input("How much is your monthly Capital Expenditure budget? " ))
                 monthly_prop_man = int(input("How much is your monthly property management budget? " ))
-                expense_list = {
+                expense_dict = {
                     'insurance':monthly_insurance, 'utilities':monthly_utilities, 
                     'lawncare':monthly_lawncare, 'mortgage':monthly_mortgage, 
                     'vacancy':monthly_vacancy, 'repairs':monthly_repairs, 
-                    'cap_x':monthly_cap_x, 'prop_man':monthly_prop_man
+                    'cap_x':monthly_cap_x, 'property_management':monthly_prop_man
                 }
-                return expense_list
+                return expense_dict
             except:
                 quit = input("One of those numbers didn't work. Let's try this again. Skip this step by hitting (W). ").lower().strip()
                 if quit == 'w':
                     break
-    def unit_expense_get(self):
-        while True:
-            try:
-                monthly_insurance = int(input("How much is your monthly insurance cost? "))
-                monthly_utilities = int(input("How much is your monthly utilities cost? "))
-                monthly_lawncare = int(input("How much is your monthly lawncare cost? "))
-                monthly_mortgage = int(input("How much is your monthly mortgage cost? "))
-                monthly_vacancy = int(input("How much is your monthly vacancy budget? "))
-                monthly_repairs = int(input("How much is your monthly repairs budget?" ))
-                monthly_cap_x = int(input("How much is your monthly Capital Expenditure budget? "))
-                monthly_prop_man = int(input("How much is your monthly property management budget? "))
-            
-                return (monthly_insurance, monthly_utilities, monthly_lawncare, monthly_mortgage, monthly_vacancy, monthly_repairs, monthly_cap_x, monthly_prop_man)
-            except:
-                quit = input("That last number didn't work. Let's try this again. Skip this step by hitting (W).").lower().strip()
-                if quit == 'w':
-                    break
+                
 
-    def unit_expenses(self, prop_object):
-        for unit in prop_object.portfolio:
+    def unit_expenses(self, building):
+        for unit in building['unit_list']:
             while True:
                 choice = input(f"Would you like to (S)et {unit}'s expenses or leave them as a (P)ercentage? ")
                 if choice in ['s', 'set']:
                     unit_expenses = self.expenses_get()
-                    self.expense_assign(unit, unit_expenses)
+                    unit.update(unit_expenses.copy())
                     break
                 if choice in ['p', 'per', 'perc', 'percentage', 'percent']:
-                    print(f"this is the {choice}")
                     percent = self.percentage_get()
-                    print(F'this is the new {percent}')
-                    unit.st_percent_all_expense(percent)
+                    for expense in e_d.keys():
+                        unit[expense] = unit['rent'] * percent
                     break
                 else:
                     input("Try that again. (S)et or (P)ercent.")
@@ -316,14 +315,14 @@ Individual names are encouraged to avoid confusion. """)
         print(f"Welcome to your roi portfolio {self}!\n?")
         while True:
             task = input(f"""Do you want to work with your (P)ortfolio
-Propert(Y)
+building(Y)
 or (U)nits""").lower().strip()
             if task in ['p', 'port', 'portfolio', 'folio']:
                 pass
             # access the user and use the generic menu
-            elif task in ['y', 'prop','ty', 'property']:
+            elif task in ['y', 'prop','ty', 'building']:
                 pass
-            # a function that uses the generic menu to access all the properties
+            # a function that uses the generic menu to access all the buildings
             elif task in ['u', 'unit', 'un']:
                 pass
             # 
@@ -333,7 +332,7 @@ or (U)nits""").lower().strip()
         print(f'investment: {user.investment}')
 
 
-#     def Property_show_all(self, building, investment):
+#     def building_show_all(self, building, investment):
 #         building.monthly_expenses = 0
 #         building.monthly_income = 0
 

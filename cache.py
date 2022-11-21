@@ -1,6 +1,11 @@
 owner_dct = {}
 
-
+expense_dict = {
+                    'insurance':0, 'utilities':0, 
+                    'lawncare':0, 'mortgage':0, 
+                    'vacancy':0, 'repairs':0, 
+                    'cap_x':0, 'prop_man':0
+                }
 input_dct = {
     'set_options' : ['rent',
  'laundry_income',
