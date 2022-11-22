@@ -112,6 +112,9 @@ And based on your investment your ROI is {building.yearly_cashflow / investment}
 class Building(Owner):
     def __init__(self, name, investment):
         super().__init__(name)
+
+
+        
         self.monthly_income = 0
         self.monthly_expenses = 0
         self.monthly_cashflow
@@ -126,7 +129,8 @@ class Building(Owner):
 
 
 class Unit(Building):
-    def __init__(self, name, rent =0,mortgage = 0, laundry=0, storage=0, misc=0, insurance=1, utilities=1, lawncare=1,property_management=1, cap_x=1,repairs=1,vacancy=1):
+    def __init__(self, name=None, rent =0,mortgage = 0, laundry=0, storage=0, misc=0, insurance=1, utilities=1, lawncare=1,property_management=1, cap_x=1,repairs=1,vacancy=1
+    ):
         self.name = name
         super().__init__(name, investment=0)
         # income sources
@@ -145,9 +149,7 @@ class Unit(Building):
         self._property_management = property_management
         self.monthly_income = 0
         self.monthly_expenses = 0
-        self.monthly_cashflow
-        self.set_roi()
-
+        
     # def check_source(self, source):
     #     """Income checks"""
         # if source == 'rent':
@@ -174,7 +176,7 @@ class Unit(Building):
         # elif source == 'cap x':
         #     print(f'Monthly Cap X cost: {self.cap_x}')
         # elif source == 'prop':
-        #     print(f'Monthly Property Management cost: {self.prop_management}')
+        #     print(f'Monthly Property Management cost: {self.property_management}')
         
 
 
@@ -227,7 +229,7 @@ class Unit(Building):
 
     @property
     def property_management(self):
-        return self._prop_management
+        return self._property_management
 
     # attribute setters and incrementers
     #       income
@@ -283,33 +285,34 @@ class Unit(Building):
         self._cap_x = new_cap_x
 
     @property_management.setter
-    def property_management(self, new_prop_management=0):
-        self._prop_management = new_prop_management
+    def property_management(self, new_property_management=0):
+        self._property_management = new_property_management
 
-    monthly_income.setter
-    def monthly_income(self, new=0):
-        if self.rent:
-            self._monthly_income = self.rent + self.laundry + self.storage + self.misc
-        else:
-            if new < 0:
-                raise ValueError(f"You cannot have negative monthly expenses.")
-            else:
-                self._monthly_income = new
+    # @monthly_income.setter
+    # def monthly_income(self, new=0):
+    #     if self.rent:
+    #         self._monthly_income = self.rent + self.laundry + self.storage + self.misc
+    #     else:
+    #         if new < 0:
+    #             raise ValueError(f"You cannot have negative monthly expenses.")
+    #         else:
+    #             self._monthly_income = new
 
-    @monthly_expenses.setter
-    def monthly_expenses(self, new=0):
-        if self._insurance:
-            self._monthly_expenses =self.insurance + self.utilities + self.lawncare + self.mortgage + self.vacancy + self.repairs + self.cap_x + self.property_management
-        else:
-            if new < 0:
-                raise ValueError(f"You cannot have negative monthly expenses.")
-            else:
-                self._monthly_expenses = new
+
+    # @monthly_expenses.setter
+    # def monthly_expenses(self, new=0):
+    #     if self._insurance:
+    #         self._monthly_expenses =self.insurance + self.utilities + self.lawncare + self.mortgage + self.vacancy + self.repairs + self.cap_x + self.property_management
+    #     else:
+    #         if new < 0:
+    #             raise ValueError(f"You cannot have negative monthly expenses.")
+    #         else:
+    #             self._monthly_expenses = new
 
     def st_lump_income(self, rent, laundry_income, storage_income, misc_income,):
         pass
 
-    def st_lump_expenses(self, new_mortgage , new_insurance, new_utilities, new_lawn_care_expense, new_vacancy, new_repairs, new_cap_x, new_prop_management):
+    def st_lump_expenses(self, new_mortgage , new_insurance, new_utilities, new_lawn_care_expense, new_vacancy, new_repairs, new_cap_x, new_property_management):
         self.insurance = new_insurance
         self.utilities = new_utilities
         self.lawncare = new_lawn_care_expense
@@ -317,7 +320,7 @@ class Unit(Building):
         self.vacancy = new_vacancy
         self.repairs = new_repairs
         self.cap_x = new_cap_x
-        self.property_management = new_prop_management
+        self.property_management = new_property_management
 
     def st_expenses_all(self):
         pass

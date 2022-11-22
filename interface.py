@@ -49,18 +49,15 @@ Individual names are encouraged to avoid confusion. """)
     def create_building(self, user, building):
         unit_list = []
         for unit in building['unit_list']:
-            print( building['name'], unit['name'], unit)
-            unit_list.append(self.create_unit(building['name'], unit['name'], unit))
+            print(unit)
+            unit = Unit(**unit)
+            unit_list.append(unit)
         building = Building(building['name'], building['investment'])
         user.portfolio.append(building)
         for unit in unit_list:
             building.portfolio.append(unit)
+        return building
         
-        
-
-    def create_unit(self, building, name, **kwargs):
-        name = Unit(name, **kwargs)
-        building.portfolio[name] = name
 
     def main(self):
         name = input("""Welcome to our software. Please input your name: """).lower().strip()
@@ -113,8 +110,8 @@ Individual names are encouraged to avoid confusion. """)
                         self.expenses_main(building)
                         # for unit in building['unit_list']:
                             # print(unit)
-                        self.create_building(user, building)
-                        for unit in building['unit_list']:
+                        building = self.create_building(user, building)
+                        for unit in building.portfolio:
                             print("\n")
                             unit.show_all_monthly()
                         print(building)
@@ -131,10 +128,11 @@ Individual names are encouraged to avoid confusion. """)
             unit_slm = {k: v/len(building['unit_list'])-1 for k,v in slm_income_dict.items()}
             for unit in building['unit_list']:
                 unit.update(unit_slm.copy())
-                # print(unit)
             self.expenses_main(building)
-            self.create_building(user, building)
-            for unit in building['unit_list']:
+            # for unit in building['unit_list']:
+                # print(unit)
+            building = self.create_building(user, building)
+            for unit in building.portfolio:
                 print("\n")
                 unit.show_all_monthly()
             print(building)
@@ -156,7 +154,7 @@ Individual names are encouraged to avoid confusion. """)
                 self.set_building_rent(building_name, unit_list)
                 break
             else:
-                rent_method = ("Come again? Set rent (I)ndividually or for the (P)roperty")
+                rent_method = input("Come again? Set rent (I)ndividually or for the (B)uilding.")
                 
 
     def set_building_rent(self, building_name, unit_list):
@@ -270,12 +268,12 @@ Individual names are encouraged to avoid confusion. """)
                 monthly_vacancy = int(input("How much is your monthly vacancy budget? " ))
                 monthly_repairs = int(input("How much is your monthly repairs budget? " ))
                 monthly_cap_x = int(input("How much is your monthly Capital Expenditure budget? " ))
-                monthly_prop_man = int(input("How much is your monthly property management budget? " ))
+                monthly_prop_management = int(input("How much is your monthly property management budget? " ))
                 expense_dict = {
                     'insurance':monthly_insurance, 'utilities':monthly_utilities, 
                     'lawncare':monthly_lawncare, 'mortgage':monthly_mortgage, 
                     'vacancy':monthly_vacancy, 'repairs':monthly_repairs, 
-                    'cap_x':monthly_cap_x, 'property_management':monthly_prop_man
+                    'cap_x':monthly_cap_x, 'property_management':monthly_prop_management
                 }
                 return expense_dict
             except:
@@ -308,7 +306,7 @@ Individual names are encouraged to avoid confusion. """)
         unit.vacancy =expense_dict['vacancy']
         unit.repairs =expense_dict['repairs']
         unit.cap_x =expense_dict['cap_x']
-        unit.property_management =expense_dict['prop_man']
+        unit.property_management =expense_dict['prop_management']
 
 
     def returning_user(self):
